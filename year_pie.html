@@ -1,3 +1,5 @@
+<!-- Reference: Visual template is from https://github.com/sitepoint-editors/ThePieGetsBigger -->
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -23,6 +25,7 @@
     #leg3 { background-color: #8da0cb; }
     #leg4 { background-color: #e78ac3; }
     #leg5 { background-color: #a6d854; }
+    #leg6 { background-color: #ffcc00; }
     #avLeg { background-color: grey; }
 
     @media screen and (min-width: 768px) {
@@ -72,32 +75,37 @@
             <tbody>
               <tr>
                 <th></th>
-                <th>Income Bracket</th>
-                <th>Household Income (2015 dollars)</th>
+                <th>Companies</th>
+                <th>Overall Employee Review Score</th>
+              </tr>
+              <tr>
+                <td id="leg6"></td>
+                <td>Google</td>
+                <td class="money-cell"><span id="fig6"></span></td>
               </tr>
               <tr>
                 <td id="leg5"></td>
-                <td>Highest 20%</td>
+                <td>Amazon</td>
                 <td class="money-cell"><span id="fig5"></span></td>
               </tr>
               <tr>
                 <td id="leg4"></td>
-                <td>Second-Highest 20%</td>
+                <td>Facebook</td>
                 <td class="money-cell"><span id="fig4"></span></td>
               </tr>
               <tr>
                 <td id="leg3"></td>
-                <td>Middle 20%</td>
+                <td>Netflix</td>
                 <td class="money-cell"><span id="fig3"></span></td>
               </tr>
               <tr>
                 <td id="leg2"></td>
-                <td>Second-Lowest 20%</td>
+                <td>Apple</td>
                 <td class="money-cell"><span id="fig2"></span></td>
               </tr>
               <tr>
                 <td id="leg1"></td>
-                <td>Lowest 20%</td>
+                <td>Microsoft</td>
                 <td class="money-cell"><span id="fig1"></span></td>
               </tr>
             </tbody>
@@ -132,7 +140,7 @@
         .append("g")
           .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-      const color = d3.scaleOrdinal(["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854","#ffd92f"]);
+      const color = d3.scaleOrdinal(["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854","#ffcc00","#ffd92f"]);
 
       const pie = d3.pie()
         .value(1)
@@ -144,27 +152,31 @@
       function prepareData(d){
         return {
           name: d.year,
-          average: parseInt(d.average),
+          average: parseFloat(d.average),
           values: [
             {
               name: "first",
-              value: parseInt(d["1"])
+              value: parseFloat(d["microsoft"])
             },
             {
               name: "second",
-              value: parseInt(d["2"])
+              value: parseFloat(d["apple"])
             },
             {
               name: "third",
-              value: parseInt(d["3"])
+              value: parseFloat(d["netflix"])
             },
             {
               name: "fourth",
-              value: parseInt(d["4"])
+              value: parseFloat(d["facebook"])
             },
             {
               name: "fifth",
-              value: parseInt(d["5"])
+              value: parseFloat(d["amazon"])
+            },
+            {
+              name: "sixth",
+              value: parseFloat(d["google"])
             }
           ]
         }
@@ -176,12 +188,14 @@
         return t => arc(i(t));
       }
 
-      d3.csv("data/incomes.csv", prepareData).then(data => {
+      d3.csv("data/year.csv", prepareData).then(data => {
         data = data.reverse();
 
         const radiusScale = d3.scaleSqrt()
-          .domain([0, data[49].values[4].value])
+          .domain([0, 5])
           .range([0, Math.min(width, height) / 2]);
+
+        // domain([0, data[6].values[5].value])
 
         function update(data) {
           updateHTML(data);
@@ -193,7 +207,7 @@
             .data(pie(data.values));
 
           // UPDATE
-          path.transition().duration(200).attrTween("d", arcTween);
+          path.transition().duration(1000).attrTween("d", arcTween);
 
           // ENTER
           path.enter().append("path")
@@ -203,7 +217,7 @@
             .attr("stroke-width", "2px")
             .each(function(d) { this._current = d; });
 
-          svg.select(".averageLine").transition().duration(200)
+          svg.select(".averageLine").transition().duration(1000)
             .attr("r", radiusScale(data.average));
         }
 
@@ -212,14 +226,14 @@
 
         function step() {
           update(data[time]);
-          time = (time == 49) ? 0 : time + 1;
+          time = (time == 6) ? 0 : time + 1;
         }
 
         $("#play-button").on("click", function() {
           const button = $(this);
           if (button.text() === "Play"){
             button.text("Pause");
-            interval = setInterval(step, 200);
+            interval = setInterval(step, 1000);
           } else {
             button.text("Play");
             clearInterval(interval);
@@ -227,7 +241,7 @@
         });
 
         $("#date-slider").slider({
-          max: 49,
+          max: 6,
           min: 0,
           step: 1,
           slide: (event, ui) => {
@@ -273,6 +287,7 @@
         $("#fig3").html(data.values[2].value.toLocaleString());
         $("#fig4").html(data.values[3].value.toLocaleString());
         $("#fig5").html(data.values[4].value.toLocaleString());
+        $("#fig6").html(data.values[5].value.toLocaleString());
         $("#avFig").html(data.average.toLocaleString());
       }
     </script>
